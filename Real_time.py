@@ -8,6 +8,9 @@ import sys
 import torch
 import logging
 from faster_whisper import WhisperModel
+from pytube import YouTube
+import subprocess
+from pydub import AudioSegment
 
 # Setting up basic logging for debug messages and info
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,10 +20,11 @@ class AudioTranscriber:
         # Initializes the transcriber with a specific Whisper model size, sets up the device (GPU or CPU), and logging
         self.model_size = model_size
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'  # Chooses CUDA if available, else CPU
-        self.compute_type = 'int8' if self.device == 'cuda' else 'float32'  # Optimizes model for speed/precision based on device
+        self.compute_type = 'int8_float16' if self.device == 'cuda' else 'float32'  # Optimizes model for speed/precision based on device
         self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)  # Loads the Whisper model
-        logging.info(f"Device: {self.device}, Compute Type: {self.compute_type}")
         self.p = pyaudio.PyAudio()  # Initiates the PyAudio class for audio recording
+
+        logging.info(f"Device: {self.device}, Compute Type: {self.compute_type}")
 
 
 
@@ -49,7 +53,37 @@ class AudioTranscriber:
         transcription = " ".join([segment.text for segment in segments])  # Concatenates segments of the transcription
         logging.info(f"Detected language: {info.language} with probability {info.language_probability}")
         logging.info(f"Transcription: {transcription}")
+
         return transcription
+    
+
+    
+    def download_youtube_audio(self, url, output_path='youtube_audio.wav'):
+        
+        yt = YouTube(url)
+        audio_stream = yt.streams.get_audio_only()
+        audio_stream.download(filename='temp_audio.mp4')
+        subprocess.run(['ffmpeg', '-i', 'temp_audio.mp4', output_path])
+        os.remove('temp_audio.mp4')
+        return output_path
+    
+
+    async def transcribe_youtube_audio(self, url):
+        # Downloads the audio from a YouTube video and transcribes it
+        audio_path = self.download_youtube_audio(url)
+        audio = AudioSegment.from_file(audio_path)
+        chunk_length_ms = 5000 
+        chunks = [audio[i:i+chunk_length_ms] for i in range(0, len(audio), chunk_length_ms)]
+        transcribed_chunks = []
+        for i, chunk in enumerate(chunks):
+            chunk_path = f"chunk_{i}.wav"
+            chunk.export(chunk_path, format="wav")
+            transcription = self.transcribe_chunk(chunk_path)
+            transcribed_chunks.append(transcription)
+            os.remove(chunk_path)
+            
+        os.remove(audio_path)
+        return " ".join(transcribed_chunks)
 
 
 
@@ -81,4 +115,14 @@ class AudioTranscriber:
 
 if __name__ == '__main__':
     transcriber = AudioTranscriber()  # Instantiates the transcriber
-    transcriber.transcribe_audio()  # Starts the transcription process
+    start_time = time.time()
+    if len(sys.argv) > 1 and sys.argv[1].startswith('http'):
+        youtube_url = sys.argv[1]
+        transcription = transcriber.transcribe_youtube_audio(youtube_url)
+        print(transcription)
+    else:
+        transcriber.transcribe_audio()
+
+
+
+

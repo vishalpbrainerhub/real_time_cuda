@@ -1,6 +1,10 @@
 import torch
 from faster_whisper import WhisperModel
 import time
+import logging
+
+# Setting up basic logging for debug messages and info
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class AudioTranscriber:
     def __init__(self, model_size="large-v3"):
@@ -9,6 +13,7 @@ class AudioTranscriber:
         self.model = WhisperModel(model_size, device=self.device, compute_type=self.compute_type)
 
     def transcribe(self, audio_path):
+        logging.info('Transcribing audio to device: %s' % audio_path)
         segments, info = self.model.transcribe(audio_path)
         language = info.language
         probability = info.language_probability
@@ -17,12 +22,10 @@ class AudioTranscriber:
         return transcript, language, probability
 
 def main():
-    start_time = time.time()
-    audio_path = "data/english.mp3"
+    audio_path = input("Enter the path to the audio file: ")
     transcriber = AudioTranscriber()
     transcript, language, probability = transcriber.transcribe(audio_path)
-    print(f"Transcript: {transcript}, Language: {language}, Probability: {probability}")
-    print(f"Time taken: {time.time() - start_time}")
+    logging.info(f'Transcript: {transcript}, Language: {language}, Probability: {probability}')
 
 if __name__ == "__main__":
     main()
