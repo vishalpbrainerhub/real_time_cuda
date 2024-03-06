@@ -31,7 +31,7 @@ Press `Ctrl+C` to stop recording and save the transcription to `transcription_lo
 
 
 ### Youtube Video real time transcription
-
+----------------------------------processing---------------------------------------------
 
 ### File Transcription
 To transcribe a pre-recorded audio file:
