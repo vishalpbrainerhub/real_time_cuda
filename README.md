@@ -22,12 +22,16 @@ Install the required Python packages:
 ## Usage
 
 ### Real-time Transcription
-To transcribe audio in real-time from your microphone:
+To transcribe the audio in real-time from your microphone:
 - The model `large-v3` is used to transcribe audio. Alternatively we can use the `module-en` model.
 - python real_time.py
 
 
 Press `Ctrl+C` to stop recording and save the transcription to `transcription_log.txt`.
+
+
+### Youtube Video real time transcription
+----------------------------------processing---------------------------------------------
 
 ### File Transcription
 To transcribe a pre-recorded audio file:
