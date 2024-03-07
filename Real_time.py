@@ -11,6 +11,7 @@ from faster_whisper import WhisperModel
 from pytube import YouTube
 import subprocess
 from pydub import AudioSegment
+import asyncio
 
 # Setting up basic logging for debug messages and info
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -118,11 +119,8 @@ if __name__ == '__main__':
     start_time = time.time()
     if len(sys.argv) > 1 and sys.argv[1].startswith('http'):
         youtube_url = sys.argv[1]
-        transcription = transcriber.transcribe_youtube_audio(youtube_url)
+        # Use asyncio.run to run the asynchronous function
+        transcription = asyncio.run(transcriber.transcribe_youtube_audio(youtube_url))
         print(transcription)
     else:
         transcriber.transcribe_audio()
-
-
-
-
