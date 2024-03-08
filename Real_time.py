@@ -1,3 +1,5 @@
+# this it normal code check the async_real_time.py for the async version of this code
+
 import pyaudio
 import wave
 import os

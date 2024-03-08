@@ -24,7 +24,7 @@ Install the required Python packages:
 ### Real-time Transcription
 To transcribe the audio in real-time from your microphone:
 - The model `large-v3` is used to transcribe audio. Alternatively we can use the `module-en` model.
-- python real_time.py
+- python async_realtime.py
 
 
 Press `Ctrl+C` to stop recording and save the transcription to `transcription_log.txt`.
